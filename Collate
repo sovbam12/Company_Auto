@@ -1,0 +1,21 @@
+function collateCSVs() {
+  var folderID = "134rjJCGstFu628KVea3OVTlMFSYKBhlg"; // Replace with the ID of the folder containing the CSVs
+  var folder = DriveApp.getFolderById(folderID);
+  var files = folder.getFilesByType(MimeType.CSV);
+  var allData = [];
+
+  while (files.hasNext()) {
+    var file = files.next();
+    var csvData = Utilities.parseCsv(file.getBlob().getDataAsString(), ",");
+    var indexedCsvData = csvData.map(function(row) {
+      return [file.getName()].concat(row);
+    });
+    allData = allData.concat(indexedCsvData);
+  }
+
+  var headerRow = ["Source CSV"].concat(allData[0]);
+  allData.splice(0, 1, headerRow);
+
+  var newFile = DriveApp.createFile("collated2.csv", allData.join("\n"));
+  Logger.log("New file created with ID: " + newFile.getId());
+}
